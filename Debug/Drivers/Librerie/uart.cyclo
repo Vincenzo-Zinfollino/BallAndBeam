@@ -1,0 +1,4 @@
+../Drivers/Librerie/uart.c:13:6:uartx_write	1
+../Drivers/Librerie/uart.c:19:6:uartx_write_text	2
+../Drivers/Librerie/uart.c:27:9:uartx_read	1
+../Drivers/Librerie/uart.c:36:6:uartx_read_text	3

@@ -1,0 +1,9 @@
+../Drivers/Librerie/VL53L0X/lidarvl53.c:22:6:lidar_init	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:48:6:cont_lidar_init	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:78:10:lidar_lee_mm	2
+../Drivers/Librerie/VL53L0X/lidarvl53.c:89:7:lidar_lee_cm	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:94:9:lidar_set_dir	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:102:6:clearInterrupt	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:107:6:startMeasurement	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:114:6:stopMeasurement	1
+../Drivers/Librerie/VL53L0X/lidarvl53.c:121:10:getRangeData	2
