@@ -74,6 +74,9 @@ static void MX_TIM3_Init(void);
 
 	uint16_t millimeter=0;
 	float distance =0 ;
+	float filteredpos=0;
+	float vel=0;
+	uint8_t isFirstReading=0;
 
 /* USER CODE END 0 */
 
@@ -141,9 +144,20 @@ int main(void)
 	 printf(" read %f\n",distance);
 	 fflush(stdout);
 	 NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+	 if(!isFirstReading==0){
      rbpush(&sys.Ball_pos, distance);
+	 }else{
+		  isFirstReading=1;// evita d'inserire nel buffer il primo valore che proviene dal sensore poich è sempre errato
+	 }
+     ball_estimation(&sys);
+     rblast(&sys.Ball_pos_filtered,&filteredpos);
+     filteredpos=filteredpos;
 
-	 HAL_Delay(20);
+     rblast(&sys.Ball_vel,&vel);
+
+     vel=vel;
+
+	 //HAL_Delay(20);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

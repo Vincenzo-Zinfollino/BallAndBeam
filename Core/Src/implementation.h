@@ -12,7 +12,7 @@
 #define Ball_Mass 15 // Mass of the ball [g]
 #define Ball_Radius 22.5 // Radius of the ball [mm]
 
-#define Read_TS 500   //lidar sampling time [ms]
+#define Read_TS  210   //lidar sampling time [ms]
 #define Prescaler_lidar 1343
 #define clock_freq 84000000
 
@@ -23,6 +23,7 @@ typedef struct system{
 
 
 	ringbuffer_t Ball_pos; // position of the ball on the beam [ 0 to Beam_Lenght]
+	ringbuffer_t Ball_pos_filtered;
 	ringbuffer_t Ball_vel;
 	ringbuffer_t Ball_acc;
 

@@ -7483,7 +7483,7 @@ static HAL_StatusTypeDef I2C_WaitOnRXNEFlagUntilTimeout(I2C_HandleTypeDef *hi2c,
     }
 
     /* Check for the Timeout */
-    if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U))
+     if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U))
     {
       if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_RXNE) == RESET))
       {

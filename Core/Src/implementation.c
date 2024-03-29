@@ -68,7 +68,7 @@ void system_init(system_t *sys, uint8_t dir,uint32_t ts){
 
 	uint8_t i;
 
-	for (i=0; i<4; i++){
+	for (i=0; i<5; i++){
 
 		rbclear( (((ringbuffer_t *) sys)+i ) );
 	}
@@ -77,7 +77,7 @@ void system_init(system_t *sys, uint8_t dir,uint32_t ts){
 
 	//lidar_init( dir);
 
-  	cont_lidar_init( dir, ts);
+  	cont_lidar_init( dir, ts);// continuous reading inizializzation
 
 
 }
@@ -118,22 +118,19 @@ void ball_estimation(system_t *sys){
 	prec /=5;
 
 	rblast(&sys->Ball_pos,&pos_2);
-	rbget(&sys->Ball_pos, &sys->Ball_pos.tail-1,&pos_1);
+	rbget(&sys->Ball_pos, (&sys->Ball_pos.tail)-1,&pos_1);
+
+	pos=0.20*pos_2+(1-0.20)*prec; // Poors man Kalman filter
+	rbpush(&sys->Ball_pos_filtered,pos);
 
 
     rblast(&sys->Ball_vel,&vel);
 
 	velest=0.80*vel+(1-0.8)*((pos_2-pos_1)/Read_TS);
+	rbpush(&sys->Ball_vel,velest);
 
 
 
-	rblast(&sys->Ball_pos,&pos_2);
-
-
-
-
-
-	rbget(&sys->Ball_pos,1,&pos);
 
 
 

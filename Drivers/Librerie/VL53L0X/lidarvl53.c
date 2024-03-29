@@ -1,10 +1,3 @@
-/*
- * lidarvl53.c
- *
- *  Created on: Jul 20, 2023
- *      Author: alcid
- */
-
 
 #include "lidarvl53.h"
 
@@ -37,7 +30,7 @@ void lidar_init(uint8_t dir)
 	  //VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.1*65536)); //long range timing
 	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.25*65536)); //high accuracy
 	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, (FixPoint1616_t)(18*65536));
-	  VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev, 200000);
+	  VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev, 20000);
 	  VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
 	  VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
 	  VL53L0X_SetGpioConfig(Dev,LidarTrigger_Pin, VL53L0X_HISTOGRAMMODE_DISABLED,VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY,VL53L0X_INTERRUPTPOLARITY_HIGH);
@@ -60,11 +53,10 @@ void cont_lidar_init(uint8_t dir, uint32_t ts)
 	  VL53L0X_SetDeviceMode(Dev, VL53L0X_DEVICEMODE_CONTINUOUS_TIMED_RANGING);
 	  VL53L0X_SetLimitCheckEnable(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, 1);
 	  VL53L0X_SetLimitCheckEnable(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, 1);
-	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.1*65536)); //long range timing
-	  //VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.25*65536)); //high accuracy
+	  //VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.1*65536)); //long range timing
+	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.25*65536)); //high accuracy
 	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, (FixPoint1616_t)(18*65536));
-	  //VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev, 200000);
-	  VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev, 20000);
+	  VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev, 200000);
 	  VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
 	  VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
 	 // VL53L0X_SetInterMeasurementPeriodMilliSeconds ( Dev, 250);
