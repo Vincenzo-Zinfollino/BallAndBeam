@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright ï¿½ 2016, STMicroelectronics International N.V.
+ * Copyright © 2016, STMicroelectronics International N.V.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_strings.h"
-
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api.h"
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_core.h"
+#include "vl53l0x_api.h"
+#include "vl53l0x_api_core.h"
+#include "vl53l0x_api_strings.h"
 
 #ifndef __KERNEL__
 #include <stdlib.h>
@@ -65,7 +64,8 @@ VL53L0X_Error VL53L0X_check_part_used(VL53L0X_DEV Dev,
 		*Revision = VL53L0X_GETDEVICESPECIFICPARAMETER(Dev, Revision);
 		ProductId_tmp = VL53L0X_GETDEVICESPECIFICPARAMETER(Dev,
 			ProductId);
-		VL53L0X_COPYSTRING(pVL53L0X_DeviceInfo->ProductId, ProductId_tmp);
+		VL53L0X_COPYSTRING(pVL53L0X_DeviceInfo->ProductId,
+				   ProductId_tmp);
 	}
 	}
 
@@ -104,7 +104,8 @@ VL53L0X_Error VL53L0X_get_device_info(VL53L0X_DEV Dev,
 	}
 
 	if (Status == VL53L0X_ERROR_NONE) {
-		Status = VL53L0X_RdByte(Dev, VL53L0X_REG_IDENTIFICATION_MODEL_ID,
+		Status = VL53L0X_RdByte(Dev,
+				VL53L0X_REG_IDENTIFICATION_MODEL_ID,
 				&pVL53L0X_DeviceInfo->ProductType);
 	}
 
@@ -383,6 +384,7 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 		char *pSequenceStepsString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+
 	LOG_FUNCTION_START("");
 
 	switch (SequenceStepId) {
@@ -417,7 +419,8 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 }
 
 
-VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckId,
+VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev,
+	uint16_t LimitCheckId,
 	char *pLimitCheckString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;

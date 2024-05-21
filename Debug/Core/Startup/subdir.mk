@@ -16,7 +16,7 @@ S_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 Core/Startup/%.o: ../Core/Startup/%.s Core/Startup/subdir.mk
-	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X" -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc" -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/src" -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc" -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/src" -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc" -I"H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc" -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
 
 clean: clean-Core-2f-Startup
 

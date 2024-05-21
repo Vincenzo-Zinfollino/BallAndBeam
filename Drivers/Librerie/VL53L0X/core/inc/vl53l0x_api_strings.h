@@ -1,5 +1,5 @@
 /*******************************************************************************
-Copyright ï¿½ 2016, STMicroelectronics International N.V.
+ * Copyright © 2016, STMicroelectronics International N.V.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VL53L0X_API_STRINGS_H_
 #define VL53L0X_API_STRINGS_H_
 
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_def.h"
-#include "../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform.h"
+#include "vl53l0x_def.h"
+#include "vl53l0x_platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +56,8 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 		VL53L0X_SequenceStepId SequenceStepId,
 		char *pSequenceStepsString);
 
-VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckId,
+VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev,
+	uint16_t LimitCheckId,
 	char *pLimitCheckString);
 
 

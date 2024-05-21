@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "lidarvl53.h"
 #include "implementation.h"
+#include "pid_controller.h"
 #include <stdio.h>
 #include <stdlib.h>
 /* USER CODE END Includes */
@@ -46,6 +47,7 @@
 I2C_HandleTypeDef hi2c1;
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim10;
 
@@ -65,6 +67,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -73,10 +76,15 @@ static void MX_TIM3_Init(void);
 /* USER CODE BEGIN 0 */
 
 	uint16_t millimeter=0;
-	float distance =0 ;
+	//float distance =0 ;
 	float filteredpos=0;
 	float vel=0;
+	float acc=0;
+	float q0e;
 	uint8_t isFirstReading=0;
+	float lastreading=0;
+
+	float disp1;
 
 /* USER CODE END 0 */
 
@@ -94,8 +102,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -118,16 +125,25 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM10_Init();
   MX_TIM3_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
  // lidar_init(dir_s1);
 
-
-
-  system_init( &sys , DIR_S,Read_TS);
+  system_init( &sys , DIR_S,Read_TS, &htim1);
+  HAL_TIM_Base_Start_IT(&htim1); // Start the encoder reading timer
+  setupReadingTimer(&htim10); // Start the  encoder sampling timer
+  /* start PWM */
+    if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK){
+        HardFault_Handler();
+    }
   HAL_Delay(100);
-  setupReadingTimer(&htim10);
-  startMeasurement();
 
+  //startMeasurement();
+
+  pid_controller_t pid_pos;
+  PID_init(&pid_pos,KP,TI,TD,N,1);
+  //set_limit(&pid_pos,-M_PI/3,M_PI/3,-M_PI/2,M_PI/2);
+  set_limit(&pid_pos,-50,50,-M_PI/2,M_PI/2);
 
   /* USER CODE END 2 */
 
@@ -138,26 +154,59 @@ int main(void)
 
 
       ready=0;
+
       NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 	  millimeter =getRangeData();
       distance=(float) millimeter;
-	 printf(" read %f\n",distance);
+	 printf(" DISTNCE %f\n",distance);
 	 fflush(stdout);
 	 NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+
 	 if(!isFirstReading==0){
-     rbpush(&sys.Ball_pos, distance);
+		 rblast(&sys.Ball_pos,&lastreading);
+		 if(!(lastreading==distance)){
+			 rbpush(&sys.Ball_pos, distance); // questo metodo non funziona perche satura la velocità ad un valore fisso
+		 }
+
 	 }else{
 		  isFirstReading=1;// evita d'inserire nel buffer il primo valore che proviene dal sensore poich è sempre errato
+
 	 }
      ball_estimation(&sys);
+
+
+     // display purpose
      rblast(&sys.Ball_pos_filtered,&filteredpos);
+
      filteredpos=filteredpos;
 
      rblast(&sys.Ball_vel,&vel);
 
      vel=vel;
 
-	 //HAL_Delay(20);
+     //read_encoder(&sys);
+
+     rblast(&sys.q0,&q0e);
+     q0e=q0e;
+
+    // printf(" VEL %f\n",vel);
+    fflush(stdout);
+
+     rblast(&sys.Ball_acc,&acc);
+
+     acc=acc;
+
+	//HAL_Delay(20);
+
+     PID_controller_position(&sys,&pid_pos, 80);
+     apply_velocity_input(&htim2);
+
+
+
+
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -266,7 +315,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
+  htim1.Init.Period = 4000;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -292,6 +341,55 @@ static void MX_TIM1_Init(void)
   /* USER CODE BEGIN TIM1_Init 2 */
 
   /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4294967295;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
 
 }
 
@@ -361,7 +459,6 @@ static void MX_TIM10_Init(void)
   htim10.Init.Period = 62499;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn,7,0);
   if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
   {
     Error_Handler();
@@ -423,6 +520,12 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
@@ -431,11 +534,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LidarTrigger_Pin */
-  GPIO_InitStruct.Pin = LidarTrigger_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(LidarTrigger_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : StepperDir_Pin */
+  GPIO_InitStruct.Pin = StepperDir_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(StepperDir_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DirStepper_Pin */
+  GPIO_InitStruct.Pin = DirStepper_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(DirStepper_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;
@@ -445,9 +556,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 

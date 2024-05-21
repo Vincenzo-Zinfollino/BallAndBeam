@@ -1,6 +1,9 @@
-../Core/Src/implementation.c:19:6:HAL_GPIO_EXTI_Callback	16	static
-../Core/Src/implementation.c:31:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/implementation.c:52:6:setupReadingTimer	24	static
-../Core/Src/implementation.c:67:6:system_init	32	static
-../Core/Src/implementation.c:85:6:measure_ball_position	24	static
-../Core/Src/implementation.c:94:6:ball_estimation	56	static
+../Core/Src/implementation.c:31:6:HAL_GPIO_EXTI_Callback	16	static
+../Core/Src/implementation.c:37:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/implementation.c:51:6:setupReadingTimer	24	static
+../Core/Src/implementation.c:66:6:system_init	32	static
+../Core/Src/implementation.c:87:6:measure_ball_position	24	static
+../Core/Src/implementation.c:96:6:ball_estimation	64	static
+../Core/Src/implementation.c:144:6:read_encoder	40	static
+../Core/Src/implementation.c:176:6:apply_velocity_input	48	static
+../Core/Src/implementation.c:267:6:PID_controller_position	56	static

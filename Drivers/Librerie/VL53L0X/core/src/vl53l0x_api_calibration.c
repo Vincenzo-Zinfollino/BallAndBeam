@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright ï¿½ 2016, STMicroelectronics International N.V.
+ * Copyright © 2016, STMicroelectronics International N.V.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_calibration.h"
-
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api.h"
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_core.h"
+#include "vl53l0x_api.h"
+#include "vl53l0x_api_core.h"
+#include "vl53l0x_api_calibration.h"
 
 #ifndef __KERNEL__
 #include <stdlib.h>
@@ -138,7 +137,8 @@ VL53L0X_Error VL53L0X_perform_xtalk_calibration(VL53L0X_DEV Dev,
 
 		/* Round Cal Distance to Whole Number.
 		 * Note that the cal distance is in mm, therefore no resolution
-		 * is lost.*/
+		 * is lost.
+		 */
 		 xTalkCalDistanceAsInt = (XTalkCalDistance + 0x8000) >> 16;
 
 		if (xTalkStoredMeanRtnSpadsAsInt == 0 ||
@@ -147,15 +147,17 @@ VL53L0X_Error VL53L0X_perform_xtalk_calibration(VL53L0X_DEV Dev,
 			XTalkCompensationRateMegaCps = 0;
 		} else {
 			/* Round Cal Distance to Whole Number.
-			   Note that the cal distance is in mm, therefore no
-			   resolution is lost.*/
+			 * Note that the cal distance is in mm, therefore no
+			 * resolution is lost.
+			 */
 			xTalkCalDistanceAsInt = (XTalkCalDistance +
 				0x8000) >> 16;
 
 			/* Apply division by mean spad count early in the
 			 * calculation to keep the numbers small.
 			 * This ensures we can maintain a 32bit calculation.
-			 * Fixed1616 / int := Fixed1616 */
+			 * Fixed1616 / int := Fixed1616
+			 */
 			signalXTalkTotalPerSpad = (xTalkStoredMeanSignalRate) /
 				xTalkStoredMeanRtnSpadsAsInt;
 
@@ -260,7 +262,8 @@ VL53L0X_Error VL53L0X_perform_offset_calibration(VL53L0X_DEV Dev,
 
 		/* Round Cal Distance to Whole Number.
 		 * Note that the cal distance is in mm, therefore no resolution
-		 * is lost.*/
+		 * is lost.
+		 */
 		 CalDistanceAsInt_mm = (CalDistanceMilliMeter + 0x8000) >> 16;
 
 		 *pOffsetMicroMeter = (CalDistanceAsInt_mm -
@@ -363,7 +366,8 @@ VL53L0X_Error VL53L0X_apply_offset_adjustment(VL53L0X_DEV Dev)
 	int32_t CurrentOffsetMicroMeters;
 
 	/* if we run on this function we can read all the NVM info
-	 * used by the API */
+	 * used by the API
+	 */
 	Status = VL53L0X_get_info_from_device(Dev, 7);
 
 	/* Read back current device offset */
@@ -427,7 +431,8 @@ void get_next_good_spad(uint8_t goodSpadArray[], uint32_t size,
 
 		if (coarseIndex == startIndex) {
 			/* locate the bit position of the provided current
-			 * spad bit before iterating */
+			 * spad bit before iterating
+			 */
 			dataByte >>= fineOffset;
 			fineIndex = fineOffset;
 		}
@@ -453,6 +458,7 @@ uint8_t is_aperture(uint32_t spadIndex)
 	 */
 	uint32_t quadrant;
 	uint8_t isAperture = 1;
+
 	quadrant = spadIndex >> 6;
 	if (refArrayQuadrants[quadrant] == REF_ARRAY_SPAD_0)
 		isAperture = 0;
@@ -516,7 +522,7 @@ VL53L0X_Error count_enabled_spads(uint8_t spadArray[],
 				if (!spadTypeIdentified) {
 					*pIsAperture = 1;
 					if ((byteIndex < 2) && (bitIndex < 4))
-							*pIsAperture = 0;
+						*pIsAperture = 0;
 					spadTypeIdentified = 1;
 				}
 			}
@@ -757,7 +763,7 @@ VL53L0X_Error VL53L0X_perform_ref_spad_management(VL53L0X_DEV Dev,
 
 	if (Status == VL53L0X_ERROR_NONE)
 		Status = VL53L0X_WrByte(Dev,
-				VL53L0X_REG_POWER_MANAGEMENT_GO1_POWER_FORCE, 0);
+			VL53L0X_REG_POWER_MANAGEMENT_GO1_POWER_FORCE, 0);
 
 	/* Perform ref calibration */
 	if (Status == VL53L0X_ERROR_NONE)
@@ -788,7 +794,8 @@ VL53L0X_Error VL53L0X_perform_ref_spad_management(VL53L0X_DEV Dev,
 		if ((Status == VL53L0X_ERROR_NONE) &&
 			(peakSignalRateRef > targetRefRate)) {
 			/* Signal rate measurement too high,
-			 * switch to APERTURE SPADs */
+			 * switch to APERTURE SPADs
+			 */
 
 			for (index = 0; index < spadArraySize; index++)
 				Dev->Data.SpadData.RefSpadEnables[index] = 0;
@@ -883,7 +890,8 @@ VL53L0X_Error VL53L0X_perform_ref_spad_management(VL53L0X_DEV Dev,
 			if (Status == VL53L0X_ERROR_NONE) {
 				currentSpadIndex++;
 				/* Proceed to apply the additional spad and
-				 * perform measurement. */
+				 * perform measurement.
+				 */
 				Status = set_ref_spad_map(Dev,
 					Dev->Data.SpadData.RefSpadEnables);
 			}
@@ -906,7 +914,8 @@ VL53L0X_Error VL53L0X_perform_ref_spad_management(VL53L0X_DEV Dev,
 				 */
 				if (signalRateDiff > lastSignalRateDiff) {
 					/* Previous spad map produced a closer
-					 * measurement, so choose this. */
+					 * measurement, so choose this.
+					 */
 					Status = set_ref_spad_map(Dev,
 							lastSpadArray);
 					memcpy(
@@ -1086,7 +1095,8 @@ VL53L0X_Error VL53L0X_perform_single_ref_calibration(VL53L0X_DEV Dev,
 }
 
 
-VL53L0X_Error VL53L0X_ref_calibration_io(VL53L0X_DEV Dev, uint8_t read_not_write,
+VL53L0X_Error VL53L0X_ref_calibration_io(VL53L0X_DEV Dev,
+	uint8_t read_not_write,
 	uint8_t VhvSettings, uint8_t PhaseCal,
 	uint8_t *pVhvSettings, uint8_t *pPhaseCal,
 	const uint8_t vhv_enable, const uint8_t phase_enable)
@@ -1224,7 +1234,8 @@ VL53L0X_Error VL53L0X_perform_ref_calibration(VL53L0X_DEV Dev,
 	SequenceConfig = PALDevDataGet(Dev, SequenceConfig);
 
 	/* In the following function we don't save the config to optimize
-	 * writes on device. Config is saved and restored only once. */
+	 * writes on device. Config is saved and restored only once.
+	 */
 	Status = VL53L0X_perform_vhv_calibration(
 			Dev, pVhvSettings, get_data_enable, 0);
 

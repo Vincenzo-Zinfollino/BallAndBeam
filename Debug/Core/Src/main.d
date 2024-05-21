@@ -1,4 +1,11 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/main.o: ../Core/Src/main.c \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_types.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_device.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_types.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_i2c_platform.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -29,20 +36,21 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
+ ../Core/Inc/main.h \
  H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/lidarvl53.h \
  H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/vl53l0x_api.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_strings.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_def.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_device.h \
- H:\Workspace\STm\RangeTest\Drivers\Librerie\VL53L0X\platform\inc\vl53l0x_types.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_types.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_def.h \
- H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform.h \
- ../Core/Src/implementation.h ../Core/Src/ringbuffer.h
-../Core/Inc/main.h:
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/vl53l0x_api_strings.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/vl53l0x_def.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h \
+ ../Core/Src/implementation.h ../Core/Src/ringbuffer.h \
+ ../Core/Src/pid_controller.h
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_types.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_device.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_types.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_i2c_platform.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -73,17 +81,12 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+../Core/Inc/main.h:
 H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/lidarvl53.h:
 H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/vl53l0x_api.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_strings.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_def.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_device.h:
-H:\Workspace\STm\RangeTest\Drivers\Librerie\VL53L0X\platform\inc\vl53l0x_types.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_types.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/core/inc/vl53l0x_def.h:
-H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/vl53l0x_api_strings.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/../../Librerie/VL53L0X/core/inc/vl53l0x_def.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h:
 ../Core/Src/implementation.h:
 ../Core/Src/ringbuffer.h:
+../Core/Src/pid_controller.h:

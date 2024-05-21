@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright ï¿½ 2016, STMicroelectronics International N.V.
+ * Copyright © 2016, STMicroelectronics International N.V.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api.h"
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_api_core.h"
+#include "vl53l0x_api.h"
+#include "vl53l0x_api_core.h"
 
 
 #ifndef __KERNEL__

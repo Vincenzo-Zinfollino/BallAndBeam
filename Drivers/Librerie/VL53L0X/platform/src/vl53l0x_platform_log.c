@@ -24,8 +24,8 @@
 #define snprintf _snprintf
 #endif
 
-#include "../../../../Librerie/VL53L0X/core/inc/vl53l0x_def.h"
-#include "../../../../Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h"
+#include "vl53l0x_def.h"
+#include "vl53l0x_platform_log.h"
 
 
 uint32_t _trace_level = TRACE_LEVEL_WARNING;

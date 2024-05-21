@@ -1,5 +1,11 @@
 Drivers/Librerie/uart.o: ../Drivers/Librerie/uart.c \
- ../Drivers/Librerie/../Librerie/uart.h ../Core/Inc/main.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_types.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_device.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_types.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_i2c_platform.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -29,9 +35,15 @@ Drivers/Librerie/uart.o: ../Drivers/Librerie/uart.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-../Drivers/Librerie/../Librerie/uart.h:
-../Core/Inc/main.h:
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
+ ../Drivers/Librerie/../Librerie/uart.h ../Core/Inc/main.h
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_types.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_device.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_types.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_i2c_platform.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -62,3 +74,5 @@ Drivers/Librerie/uart.o: ../Drivers/Librerie/uart.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+../Drivers/Librerie/../Librerie/uart.h:
+../Core/Inc/main.h:

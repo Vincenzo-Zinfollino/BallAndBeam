@@ -1,5 +1,12 @@
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_types.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_device.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_types.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h \
+ H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_i2c_platform.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -30,6 +37,13 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_types.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_def.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_device.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/core/inc/vl53l0x_types.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_platform_log.h:
+H:/Workspace/STm/RangeTest/Drivers/Librerie/VL53L0X/platform/inc/vl53l0x_i2c_platform.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:

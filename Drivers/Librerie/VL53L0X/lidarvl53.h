@@ -1,14 +1,14 @@
 
 
 
-#define lidar_max_mm 200
+#define lidar_max_mm 400
 
 #ifndef LIBERRIAS_VL53L0X_LIDARVL53_H_
 #define LIBERRIAS_VL53L0X_LIDARVL53_H_
 
 #define DIR_S 0x52  //I2C Address of the sensor
 
-
+//#define DIR_S 0x29
 
 
 #include "../../Librerie/VL53L0X/core/inc/vl53l0x_api.h"
