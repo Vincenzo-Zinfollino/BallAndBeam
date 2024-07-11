@@ -16,13 +16,14 @@
 uint8_t ready=0;
 uint16_t mill;
 system_t sys;
-pid_controller_t pid_pos;
+//pid_controller_t pid_pos;
 
 float offset_encoder =0.f;
 float u_ref;
 
 uint16_t millimeter1;
 float distance=0;
+
 
 
 
@@ -41,7 +42,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		 //fflush(stdout);
 
 
-		 read_encoder(&sys);
+		read_encoder(&sys);
+		//HCSR04_Read();
+
+
+
+
+		PID_controller_position(&sys);
+		apply_velocity_input(&sys,sys.htim_PWM);
 
 
 	}
@@ -50,7 +58,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 void setupReadingTimer(TIM_HandleTypeDef *htim){
 
-	uint16_t ARR=52500;
+	//uint16_t ARR=52500;
+	uint16_t ARR=55999;
 
     //ARR=(Read_TS*clock_freq)/Prescaler_lidar;
 	__HAL_TIM_SET_PRESCALER(htim, Prescaler_lidar);
@@ -63,7 +72,7 @@ void setupReadingTimer(TIM_HandleTypeDef *htim){
 
 
 
-void system_init(system_t *sys, uint8_t dir,uint32_t ts, TIM_HandleTypeDef *htim1){
+void system_init(system_t *sys, uint8_t dir,uint32_t ts, TIM_HandleTypeDef *htim1,TIM_HandleTypeDef *htim2,TIM_HandleTypeDef *htim3,pid_controller_t pid_pos){
 
 	uint8_t i;
 
@@ -79,6 +88,10 @@ void system_init(system_t *sys, uint8_t dir,uint32_t ts, TIM_HandleTypeDef *htim
   	cont_lidar_init( dir, ts);// continuous reading inizializzation
 
   	sys->htim_encoder1=htim1;
+  	sys->htim_PWM=htim2;
+  	sys->htim_HCSR04=htim3;
+  	sys->pid_pos=pid_pos;
+
 
 
 
@@ -117,7 +130,8 @@ void ball_estimation(system_t *sys){
 	rblast(&sys->Ball_pos,&pos_2);
 	rbget(&sys->Ball_pos, ((&sys->Ball_pos.tail)-1),&pos_1);
 
-	pos=0.60*pos_2+(1-0.60)*prec; // Poors man Kalman filter
+	//pos=0.60*pos_2+(1-0.60)*prec; // Poors man Kalman filter
+	pos=0.40*pos_2+(1-0.40)*prec;
 	rbpush(&sys->Ball_pos_filtered,pos);
 
 
@@ -173,7 +187,7 @@ void read_encoder(system_t *sys){
 
 
 
-void apply_velocity_input(TIM_HandleTypeDef *htim1){
+void apply_velocity_input(system_t *sys,TIM_HandleTypeDef *htim1){
 
 
 	/* T_C = steps*clock_period */
@@ -183,15 +197,24 @@ void apply_velocity_input(TIM_HandleTypeDef *htim1){
     uint32_t steps, ARR, CCR;
     uint16_t prescaler1;
 
+    float u=sys->last_pid_out;
 
+    /*
 
+    if(u>0){
+    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_SET);
+    }else{
+    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);
+    }
+    */
 
    //dir = u_ref > 0 ?  GPIO_PIN_SET : GPIO_PIN_RESET;
    //HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, dir);
 
-   prescaler1= (uint16_t) 42000;//12000 ;//8400;
+   prescaler1= (uint16_t) 50000;//30000;//12000 ;//8400;
    f=HAL_RCC_GetPCLK1Freq()*2;
-   ARR= fabs(u_ref) < 0.01 ? 0:(uint32_t)(RESOLUTION*f/(fabs(u_ref)*16*prescaler1));
+   //ARR= fabs(u_ref) < 0.01 ? 0:(uint32_t)(RESOLUTION*f/(fabs(u_ref)*16*prescaler1));/// modificato 0.01
+   ARR= (uint32_t)(RESOLUTION*f/(fabs(u)*16*prescaler1));
    CCR= ARR /2;
    __HAL_TIM_SET_PRESCALER(htim1, prescaler1);//2625
    __HAL_TIM_SET_AUTORELOAD(htim1, ARR);
@@ -264,9 +287,11 @@ void apply_velocity_input(TIM_HandleTypeDef *htim1){
 
 
 
-void PID_controller_position(system_t *sys, pid_controller_t *pid , float setpoint){
+void PID_controller_position(system_t *sys){
 
 	  int8_t dir;
+	  pid_controller_t *pid_pos;
+	  pid_pos=&sys->pid_pos;
 
 	float set_point1,lidar_measure,encoder_measure,alpha, u0,tc0,u_star;
 	float vcmi,vcme; //velocità del centro di massa della sfera
@@ -275,39 +300,51 @@ void PID_controller_position(system_t *sys, pid_controller_t *pid , float setpoi
 
 	float alfa_star=0;
 
-	set_point1=setpoint;
+	//set_point1= (float) (sys->set_point);
 
-
+	set_point1=80.00;
 	rblast(&sys->q0,&encoder_measure);// rappresenta l'angolo theta
 	//rblast(&sys->Ball_pos_filtered,&lidar_measure);// rappresenta la posizione misurata
 	rblast(&sys->Ball_pos,&lidar_measure);
 
 
 
-	PID_update(pid,set_point1, lidar_measure,T_CONTROL);
 
-	u0=pid->out;
+	//PID_update(pid,set_point1, lidar_measure,T_CONTROL);
+	PID_update(pid_pos,set_point1, lidar_measure,T_CONTROL);
+
+	//u0=pid->out;
+
+	u0=pid_pos->out;
+	//printf(" PID_OUT %f\n",u0);
+	// fflush(stdout);
 
 
 
+
+    //disp1=u0;
 
 	//u0>0
-    if(u0<0){
 
-    	alfa_star= (u0-30)*(M_PI/6-0)/(400-30);
-    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);
-    	printf(" POS_Alfa %f\n",alfa_star);
-    		 fflush(stdout);
+    if(u0>0){
+
+    	//alfa_star= (u0-30)*(M_PI/64-0)/(400-30);
+    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_SET);
+    	//printf(" POS_Alfa %f\n",alfa_star);
+    		// fflush(stdout);
 
     }else{
-    	alfa_star= (u0-30)*(0-M_PI/6)/(400-30)+(-M_PI/6);
-    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_SET);//invertito
-    	printf(" NEG_Alfa %f\n",alfa_star);
-    	    		 fflush(stdout);
+    	//alfa_star= (u0-30)*(0+M_PI/64)/(400-30)+(-M_PI/64); // 6 400
+    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);//invertito
+    	//printf(" NEG_Alfa %f\n",alfa_star);
+    	    		 //fflush(stdout);
 
     }
 
-    u_star=(alfa_star*BEAM_LENGTH)/MOTOR_ARM_LENGTH;
+    //u_star=(alfa_star*BEAM_LENGTH)/MOTOR_ARM_LENGTH;
+    u_star=u0;
+
+    //disp1=u_star;
 
    // dir = u0 > 0 ?  GPIO_PIN_SET : GPIO_PIN_RESET;
   // HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, dir);
@@ -316,21 +353,23 @@ void PID_controller_position(system_t *sys, pid_controller_t *pid , float setpoi
     if (fabs(u_star-encoder_measure)<0.01){
     	tc0= 1000000;
     }else{
-    tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/0.1);//0.4   1.05
+    tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/0.9);// 0.9 0.4 0.1  0.2 1.05
     }
 
-    u0=(u_star-encoder_measure)/tc0;
+    //tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/1.8);//0.4 0.1  0.2 1.05
+     //u0=(u_star-encoder_measure)/tc0;
+    u0=(fabs(u_star-encoder_measure))/tc0;
 
     disp1=u0;
 
     u_ref=u0;
 
+    //sys->set_point=pid_pos->out;
+    sys->last_pid_out=u0;
 
 
 
 }
-
-
 
 
 

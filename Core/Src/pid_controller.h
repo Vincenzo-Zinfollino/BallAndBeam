@@ -18,9 +18,10 @@ typedef struct{
 
 		/* GAINS */
 		float Kp;
-		float Ti;
-		float Td;
-		float N;
+		float Ki;
+		float Kd;
+		float tau;
+
 
 		/* MEMORY */
 		float prev_err;
@@ -40,7 +41,7 @@ typedef struct{
 
 } pid_controller_t;
 
-int PID_init(pid_controller_t *pid, float Kp, float Ti, float Td, float N, int Controller_type);
+int PID_init(pid_controller_t *pid, float Kp, float Ki, float Kd, float tau, int Controller_type);
 int set_limit(pid_controller_t *pid, float lim_out_min, float lim_out_max, float lim_integ_min,float lim_integ_max );
 
 int PID_update(pid_controller_t *pid, float set_point , float measure, float T_C);

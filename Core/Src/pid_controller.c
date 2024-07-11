@@ -22,14 +22,14 @@
 
 
 
-int PID_init(pid_controller_t *pid, float KP,float TI, float TD, float N,int Controller_type){
+int PID_init(pid_controller_t *pid, float KP,float KI, float KD, float tau,int Controller_type){
 
 
 	pid->type=Controller_type;
 	pid->Kp= KP;
-	pid->Ti=TI;
-	pid->Td=TD;
-	pid->N=N;
+	pid->Ki=KI;
+	pid->Kd=KD;
+	pid->tau=tau;
 
 	pid->integrator=0.f;
 	pid->derivative=0.f;
@@ -88,12 +88,17 @@ pid->out: contain the value calculated by the controller
 
 */
 
+
+
+
+
+
+
 int PID_update(pid_controller_t *pid, float set_point , float measure, float T_C){
 
 	float u=0.f;
 	float error=0.f;
 	float proportional=0.f;
-	float alpha= pid->Td/T_C;
 
 
     /* calculate the error*/
@@ -107,9 +112,14 @@ int PID_update(pid_controller_t *pid, float set_point , float measure, float T_C
 
 	/*integral contribute*/
 
+	pid->integrator=pid->integrator+0.5f*pid->Ki*T_C*(error-pid->prev_err);
 
 
-	pid->integrator+=(pid->Kp/pid->Ti)*0.5f*T_C*(error-pid->prev_err);
+
+	/* derivative contribute*/
+
+	pid->derivative=-(2.0f*pid->Kd*(measure-pid->prev_meas) +(2.0f*pid->tau - T_C)*pid->derivative)/(2.0f*pid->tau + T_C);
+	//pid->derivative=pid->Kd*(measure-pid->prev_meas);
 
 	/* try of anti wind-up*/
 
@@ -122,46 +132,25 @@ int PID_update(pid_controller_t *pid, float set_point , float measure, float T_C
 		pid->integrator=pid->lim_integ_min;
 	}
 
+   pid->out= proportional + pid->integrator + pid->derivative;
 
+   if (pid->out > pid->lim_out_max) {
 
-	/* output  */
+         pid->out = pid->lim_out_max;
 
+     } else if (pid->out < pid->lim_out_min) {
 
-	if (pid->type>0){
+         pid->out = pid->lim_out_min;
 
-	//u=proportional+pid->integrator;
-		u=proportional;
-
-	}else{
-
-	/*derivative contribute*/
-	pid->derivative= (2*(pid->Kp)*alpha*error - pid->derivative*(1-(2*alpha)/pid->N))/(1+(2*alpha)/pid->N);
-	u=proportional+0*pid->integrator+0*pid->derivative;
-	}
-
-	if(u>pid->lim_out_max)
-	{
-		pid->out=pid->lim_out_max;
-	}else if(u<pid->lim_out_min){
-
-		pid->out=pid->lim_out_min;
-
-	}else{
-		pid->out=u;
-	}
+     }
 
 
 	pid->prev_err=error;
-	pid->prev_meas=measure;
+    pid->prev_meas=measure;
 
-	return 0;
-}
-
+		return 0;
 
 
-
-
-
-
+	}
 
 

@@ -55,7 +55,7 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-
+pid_controller_t pid_pos;
 
 /* USER CODE END PV */
 
@@ -64,10 +64,10 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_TIM1_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -83,8 +83,19 @@ static void MX_TIM2_Init(void);
 	float q0e;
 	uint8_t isFirstReading=0;
 	float lastreading=0;
+	int setpoint=0;
 
 	float disp1;
+
+	float qe0;
+
+
+	uint32_t IC_Val1 = 0;
+	uint32_t IC_Val2 = 0;
+	float Difference = 0;
+	uint8_t Is_First_Captured = 0;  // is the first value captured ?
+	float Distance  = 0;
+
 
 /* USER CODE END 0 */
 
@@ -102,7 +113,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -122,28 +133,41 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
-  MX_TIM1_Init();
   MX_TIM10_Init();
   MX_TIM3_Init();
   MX_TIM2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
  // lidar_init(dir_s1);
 
-  system_init( &sys , DIR_S,Read_TS, &htim1);
-  HAL_TIM_Base_Start_IT(&htim1); // Start the encoder reading timer
+  system_init( &sys , DIR_S,Read_TS, &htim3,&htim2,&htim1, pid_pos);
+  //HAL_TIM_Base_Start_IT(&htim1); // Start the encoder reading timer
+  HAL_TIM_Base_Start_IT(&htim3);
   setupReadingTimer(&htim10); // Start the  encoder sampling timer
+
   /* start PWM */
     if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK){
         HardFault_Handler();
     }
   HAL_Delay(100);
+  startMeasurement();
 
-  //startMeasurement();
+
+     sys.set_point= 100.00;
+
+	 float KP = 0.54; //0.061; // 0.008//0.002//0.9// 0.5 //P=-13.2717  20 30 60
+	 float  KI =0; //0.25;//0.8 1.1;//1.2 0.98;//0.03//0.8 //I=0 TI=KP/KI
+	 float KD =0.95; //1.8 ;//2 ; //20
+
+
+
 
   pid_controller_t pid_pos;
-  PID_init(&pid_pos,KP,TI,TD,N,1);
+  PID_init(&sys.pid_pos,KP,KI,KD,TAU,1);
   //set_limit(&pid_pos,-M_PI/3,M_PI/3,-M_PI/2,M_PI/2);
-  set_limit(&pid_pos,-50,50,-M_PI/2,M_PI/2);
+ // set_limit(&pid_pos,-80,80,-M_PI/2,M_PI/2); //50
+  set_limit(&sys.pid_pos,-10,10,-2,2); //50
+  //HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
 
@@ -155,12 +179,12 @@ int main(void)
 
       ready=0;
 
-      NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+     // NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 	  millimeter =getRangeData();
       distance=(float) millimeter;
 	 printf(" DISTNCE %f\n",distance);
 	 fflush(stdout);
-	 NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+	 //NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 
 	 if(!isFirstReading==0){
 		 rblast(&sys.Ball_pos,&lastreading);
@@ -169,7 +193,7 @@ int main(void)
 		 }
 
 	 }else{
-		  isFirstReading=1;// evita d'inserire nel buffer il primo valore che proviene dal sensore poich è sempre errato
+		 isFirstReading=1;// evita d'inserire nel buffer il primo valore che proviene dal sensore poich è sempre errato
 
 	 }
      ball_estimation(&sys);
@@ -180,31 +204,24 @@ int main(void)
 
      filteredpos=filteredpos;
 
-     rblast(&sys.Ball_vel,&vel);
 
-     vel=vel;
+     //rblast(&sys.q0,&q0e);
 
-     //read_encoder(&sys);
+       //  q0e=q0e;
 
-     rblast(&sys.q0,&q0e);
-     q0e=q0e;
 
-    // printf(" VEL %f\n",vel);
-    fflush(stdout);
+     //rblast(&sys.Ball_pos,&distance);
+     //printf(" DISTNCE %f\n",distance);
+      //fflush(stdout);
 
-     rblast(&sys.Ball_acc,&acc);
 
-     acc=acc;
-
-	//HAL_Delay(20);
-
-     PID_controller_position(&sys,&pid_pos, 80);
-     apply_velocity_input(&htim2);
+     //PID_controller_position(&sys,&pid_pos, setpoint);
+     //apply_velocity_input(&htim2);
 
 
 
 
-
+     //HAL_Delay(10);
 
 
     /* USER CODE END WHILE */
@@ -306,35 +323,34 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 0 */
 
-  TIM_Encoder_InitTypeDef sConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM1_Init 1 */
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
+  htim1.Init.Prescaler = 71;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 4000;
+  htim1.Init.Period = 65535;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
-  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 0;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
-  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0;
-  if (HAL_TIM_Encoder_Init(&htim1, &sConfig) != HAL_OK)
+  if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -405,24 +421,28 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_Encoder_InitTypeDef sConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 1343;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 62499;
+  htim3.Init.Period = 4000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC1Filter = 0;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC2Filter = 0;
+  if (HAL_TIM_Encoder_Init(&htim3, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -454,9 +474,9 @@ static void MX_TIM10_Init(void)
 
   /* USER CODE END TIM10_Init 1 */
   htim10.Instance = TIM10;
-  htim10.Init.Prescaler = 1343;
+  htim10.Init.Prescaler = 0;
   htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 62499;
+  htim10.Init.Period = 65535;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
@@ -520,13 +540,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0|DirStepper_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LD2_Pin|Trigger_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -534,12 +551,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : StepperDir_Pin */
-  GPIO_InitStruct.Pin = StepperDir_Pin;
+  /*Configure GPIO pin : PC0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(StepperDir_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DirStepper_Pin */
   GPIO_InitStruct.Pin = DirStepper_Pin;
@@ -548,12 +565,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(DirStepper_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pins : LD2_Pin Trigger_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin|Trigger_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
@@ -570,6 +587,68 @@ int __io_putchar(int ch) {
     ITM_SendChar(ch);
     return ch;
 }
+
+
+void HCSR04_Read (void)
+{
+	HAL_GPIO_WritePin(Trigger_GPIO_Port, Trigger_Pin, GPIO_PIN_SET);  // pull the TRIG pin HIGH
+	HAL_Delay(10);  // wait for 10 us
+	HAL_GPIO_WritePin(Trigger_GPIO_Port, Trigger_Pin, GPIO_PIN_RESET);  // pull the TRIG pin low
+
+	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);
+}
+
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)  // if the interrupt source is channel1
+	{
+		if (Is_First_Captured==0) // if the first value is not captured
+		{
+			IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1); // read the first value
+			Is_First_Captured = 1;  // set the first captured as true
+			// Now change the polarity to falling edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
+		}
+
+		else if (Is_First_Captured==1)   // if the first is already captured
+		{
+			IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);  // read second value
+			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+
+			if (IC_Val2 > IC_Val1)
+			{
+				Difference = IC_Val2-IC_Val1;
+			}
+
+			else if (IC_Val1 > IC_Val2)
+			{
+				Difference = (0xffff - IC_Val1) + IC_Val2;
+			}
+
+			//Distance = Difference * .034/2;
+			Is_First_Captured = 0; // set it back to false
+
+			//rbpush(&sys.Ball_pos, Distance);
+
+			// set polarity to rising edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
+			__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC1);
+			//__HAL_TIM_DISABLE_IT(htim, TIM_CHANNEL_1);
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* USER CODE END 4 */
