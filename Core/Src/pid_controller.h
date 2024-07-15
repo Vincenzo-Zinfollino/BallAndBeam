@@ -43,6 +43,7 @@ typedef struct{
 
 int PID_init(pid_controller_t *pid, float Kp, float Ki, float Kd, float tau, int Controller_type);
 int set_limit(pid_controller_t *pid, float lim_out_min, float lim_out_max, float lim_integ_min,float lim_integ_max );
+int set_parameters(pid_controller_t *pid, float Kp, float Ki, float Kd, float tau);
 
 int PID_update(pid_controller_t *pid, float set_point , float measure, float T_C);
 

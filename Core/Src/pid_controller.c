@@ -153,4 +153,16 @@ int PID_update(pid_controller_t *pid, float set_point , float measure, float T_C
 
 	}
 
+int set_parameters(pid_controller_t *pid, float Kp, float Ki, float Kd, float tau){
+
+
+	    pid->Kp= Kp;
+		pid->Ki=Ki;
+		pid->Kd=Kd;
+		pid->tau=tau;
+
+return 0;
+
+}
+
 

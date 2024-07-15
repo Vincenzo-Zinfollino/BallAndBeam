@@ -87,6 +87,8 @@ static void MX_TIM1_Init(void);
 
 	float disp1;
 
+	float error;
+
 	float qe0;
 
 
@@ -95,6 +97,13 @@ static void MX_TIM1_Init(void);
 	float Difference = 0;
 	uint8_t Is_First_Captured = 0;  // is the first value captured ?
 	float Distance  = 0;
+
+
+
+	 float KP = 0.060; //0.08  0.016;//0.54; //0.061; // 0.008//0.002//0.9// 0.5 //P=-13.2717  20 30 60
+     float  KI =0;// 0.04; //0.25;//0.8 1.1;//1.2 0.98;//0.03//0.8 //I=0 TI=KP/KI
+	 float KD = 4.6;//1.6; //0.95; //9.21 ;//0.95; //1.8 ;//2 ; //20
+	 float TAU = 900;
 
 
 /* USER CODE END 0 */
@@ -113,7 +122,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-HAL_Init();
+ HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -153,21 +162,18 @@ HAL_Init();
   startMeasurement();
 
 
-     sys.set_point= 100.00;
+    // sys.set_point= 100.00;
 
-	 float KP = 0.54; //0.061; // 0.008//0.002//0.9// 0.5 //P=-13.2717  20 30 60
-	 float  KI =0; //0.25;//0.8 1.1;//1.2 0.98;//0.03//0.8 //I=0 TI=KP/KI
-	 float KD =0.95; //1.8 ;//2 ; //20
+
 
 
 
 
   pid_controller_t pid_pos;
   PID_init(&sys.pid_pos,KP,KI,KD,TAU,1);
-  //set_limit(&pid_pos,-M_PI/3,M_PI/3,-M_PI/2,M_PI/2);
- // set_limit(&pid_pos,-80,80,-M_PI/2,M_PI/2); //50
-  set_limit(&sys.pid_pos,-10,10,-2,2); //50
-  //HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
+
+  set_limit(&sys.pid_pos,-400,400,-60,60); //50
+
 
   /* USER CODE END 2 */
 
@@ -176,6 +182,7 @@ HAL_Init();
   while (1)
   {
 
+	  set_parameters(&sys.pid_pos, KP, KI, KD, TAU);
 
       ready=0;
 
@@ -204,10 +211,12 @@ HAL_Init();
 
      filteredpos=filteredpos;
 
+     error=sys.pid_pos.prev_err;
 
-     //rblast(&sys.q0,&q0e);
 
-       //  q0e=q0e;
+    // rblast(&sys.q0,&q0e);
+
+      // q0e=q0e;
 
 
      //rblast(&sys.Ball_pos,&distance);

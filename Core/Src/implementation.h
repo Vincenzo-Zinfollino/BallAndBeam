@@ -26,7 +26,7 @@
 //#define KP 0.5// 0.008//0.002//0.9// 0.5 //P=-13.2717  20 30 60
 //#define KI 0.1//0.03//0.8 //I=0 TI=KP/KI
 //#define KD 80//100 //0.04 //1.8 //  D=1.3575 TD=KP/D
-#define TAU 100//10500 // 200 //140.8703
+//#define TAU 900//10500 // 200 //140.8703
 
 typedef struct system{
 

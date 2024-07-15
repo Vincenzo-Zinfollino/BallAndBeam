@@ -199,19 +199,8 @@ void apply_velocity_input(system_t *sys,TIM_HandleTypeDef *htim1){
 
     float u=sys->last_pid_out;
 
-    /*
 
-    if(u>0){
-    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_SET);
-    }else{
-    	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);
-    }
-    */
-
-   //dir = u_ref > 0 ?  GPIO_PIN_SET : GPIO_PIN_RESET;
-   //HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, dir);
-
-   prescaler1= (uint16_t) 50000;//30000;//12000 ;//8400;
+   prescaler1= (uint16_t) 5000;//30000;//12000 ;//8400;
    f=HAL_RCC_GetPCLK1Freq()*2;
    //ARR= fabs(u_ref) < 0.01 ? 0:(uint32_t)(RESOLUTION*f/(fabs(u_ref)*16*prescaler1));/// modificato 0.01
    ARR= (uint32_t)(RESOLUTION*f/(fabs(u)*16*prescaler1));
@@ -296,13 +285,13 @@ void PID_controller_position(system_t *sys){
 	float set_point1,lidar_measure,encoder_measure,alpha, u0,tc0,u_star;
 	float vcmi,vcme; //velocità del centro di massa della sfera
 
-	float hi,hm,he,theta,x2;
+
 
 	float alfa_star=0;
 
 	//set_point1= (float) (sys->set_point);
 
-	set_point1=80.00;
+	set_point1=100.00;
 	rblast(&sys->q0,&encoder_measure);// rappresenta l'angolo theta
 	//rblast(&sys->Ball_pos_filtered,&lidar_measure);// rappresenta la posizione misurata
 	rblast(&sys->Ball_pos,&lidar_measure);
@@ -350,24 +339,26 @@ void PID_controller_position(system_t *sys){
   // HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, dir);
 
 
-    if (fabs(u_star-encoder_measure)<0.01){
+    if (fabs(u0-encoder_measure)<0.01){
     	tc0= 1000000;
     }else{
-    tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/0.9);// 0.9 0.4 0.1  0.2 1.05
+    //tc0 = sqrtf(2*M_PI*fabs(u0-encoder_measure)/0.9);// 0.9 0.4 0.1  0.2 1.05
+    	tc0 = sqrtf(2*M_PI*fabs(u0-encoder_measure)/1.25);
     }
 
     //tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/1.8);//0.4 0.1  0.2 1.05
      //u0=(u_star-encoder_measure)/tc0;
-    u0=(fabs(u_star-encoder_measure))/tc0;
+    u0=(fabs(u0-encoder_measure))/tc0;
 
-    disp1=u0;
+    disp1=u0; //--mostrare uscita cicloidale
 
-    u_ref=u0;
 
-    //sys->set_point=pid_pos->out;
     sys->last_pid_out=u0;
 
+    //uscita pid diretta senza cicloidale
 
+    //disp1=u_star;
+    //sys->last_pid_out=u_star;
 
 }
 
