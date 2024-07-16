@@ -16,7 +16,7 @@
 uint8_t ready=0;
 uint16_t mill;
 system_t sys;
-//pid_controller_t pid_pos;
+
 
 float offset_encoder =0.f;
 float u_ref;
@@ -55,13 +55,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	}
 }
 
+// la lettura dal sensore lidar è effettuata ogni 20ms il loop di controllo ( usando Prescaler_lidar e ARR=55999) avviene all incirca ogni 1,3 ms
 
 void setupReadingTimer(TIM_HandleTypeDef *htim){
 
-	//uint16_t ARR=52500;
+
 	uint16_t ARR=55999;
 
-    //ARR=(Read_TS*clock_freq)/Prescaler_lidar;
+
 	__HAL_TIM_SET_PRESCALER(htim, Prescaler_lidar);
 	__HAL_TIM_SET_AUTORELOAD(htim, ARR);
 
@@ -82,9 +83,6 @@ void system_init(system_t *sys, uint8_t dir,uint32_t ts, TIM_HandleTypeDef *htim
 	}
 
 	//initializing lidar sensor
-
-	//lidar_init( dir);
-
   	cont_lidar_init( dir, ts);// continuous reading inizializzation
 
   	sys->htim_encoder1=htim1;
@@ -97,14 +95,10 @@ void system_init(system_t *sys, uint8_t dir,uint32_t ts, TIM_HandleTypeDef *htim
 
 }
 
-void measure_ball_position(system_t *sys){
 
-	uint16_t pos=0;
-	//pos=lidar_lee_mm(DIR_S);
-	//mill=pos;
 
-}
-
+// questo metodo di filtraggio dei dati anche se assicura una riduzione del rumore
+//sui dati non viene utilizzato poichè rallenta troppo il loop di controllo
 
 void ball_estimation(system_t *sys){
 
@@ -130,7 +124,7 @@ void ball_estimation(system_t *sys){
 	rblast(&sys->Ball_pos,&pos_2);
 	rbget(&sys->Ball_pos, ((&sys->Ball_pos.tail)-1),&pos_1);
 
-	//pos=0.60*pos_2+(1-0.60)*prec; // Poors man Kalman filter
+	// Poors man Kalman filter
 	pos=0.40*pos_2+(1-0.40)*prec;
 	rbpush(&sys->Ball_pos_filtered,pos);
 
@@ -215,64 +209,6 @@ void apply_velocity_input(system_t *sys,TIM_HandleTypeDef *htim1){
 
 }
 
-/*void PID_controller_position(system_t *sys, pid_controller_t *pid , float setpoint){
-
-	float set_point1,lidar_measure,encoder_measure,alpha, u0,tc0,u_star;
-	float vcmi,vcme; //velocità del centro di massa della sfera
-
-	float hi,hm,he,theta,x2;
-
-
-
-	set_point1=setpoint;
-
-
-	rblast(&sys->q0,&encoder_measure);// rappresenta l'angolo theta
-	rblast(&sys->Ball_pos_filtered,&lidar_measure);// rappresenta la posizione misurata
-
-	if(!encoder_measure==0){
-		theta=encoder_measure;
-	}else
-		{
-		theta=0.01;
-		}
-
-	alpha=(theta*MOTOR_ARM_LENGTH)/BEAM_LENGTH;
-
-	hi=lidar_measure*sinf(alpha);
-	hi =fabs(hi);
-
-	vcmi=sqrtf((10/7)*G_CONST*hi);
-
-	PID_update(pid,set_point1, lidar_measure,T_CONTROL);
-
-	u0=pid->out;
-
-	x2=lidar_measure+u0;
-
-	he=fabs(x2*sinf(alpha));
-	vcme=sqrtf((10/7)*G_CONST*he);
-
-	//hm=(powf((vcme-vcmi),2)/G_CONST)*(7/10);
-	hm=(((vcme-vcmi)*(vcme-vcmi))/G_CONST)*(7/10);
-	u_star=asinf(hm/x1);
-
-
-    if (fabs(u_star-encoder_measure)<0.01){
-    	tc0= 1000000;
-    }else{
-    tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/0.4);//1.05
-    }
-
-    u0=(u_star-encoder_measure)/tc0;
-
-
-    u_ref=u0;
-
-
-}
-
-*/
 
 
 
@@ -283,79 +219,57 @@ void PID_controller_position(system_t *sys){
 	  pid_pos=&sys->pid_pos;
 
 	float set_point1,lidar_measure,encoder_measure,alpha, u0,tc0,u_star;
-	float vcmi,vcme; //velocità del centro di massa della sfera
 
 
-
-	float alfa_star=0;
-
-	//set_point1= (float) (sys->set_point);
-
+    // definizione del set point
 	set_point1=100.00;
+
+
 	rblast(&sys->q0,&encoder_measure);// rappresenta l'angolo theta
-	//rblast(&sys->Ball_pos_filtered,&lidar_measure);// rappresenta la posizione misurata
-	rblast(&sys->Ball_pos,&lidar_measure);
+	//rblast(&sys->Ball_pos_filtered,&lidar_measure);// rappresenta la posizione  filtrata
+	rblast(&sys->Ball_pos,&lidar_measure);// rappresenta la posizione acquisita dal sensore
 
 
-
-
-	//PID_update(pid,set_point1, lidar_measure,T_CONTROL);
 	PID_update(pid_pos,set_point1, lidar_measure,T_CONTROL);
 
-	//u0=pid->out;
 
-	u0=pid_pos->out;
+	u0=pid_pos->out; // uscita del PID
 	//printf(" PID_OUT %f\n",u0);
 	// fflush(stdout);
 
 
 
-
-    //disp1=u0;
-
-	//u0>0
-
     if(u0>0){
 
-    	//alfa_star= (u0-30)*(M_PI/64-0)/(400-30);
     	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_SET);
-    	//printf(" POS_Alfa %f\n",alfa_star);
-    		// fflush(stdout);
+
 
     }else{
-    	//alfa_star= (u0-30)*(0+M_PI/64)/(400-30)+(-M_PI/64); // 6 400
+
     	HAL_GPIO_WritePin( DirStepper_GPIO_Port, DirStepper_Pin, GPIO_PIN_RESET);//invertito
-    	//printf(" NEG_Alfa %f\n",alfa_star);
-    	    		 //fflush(stdout);
 
     }
 
-    //u_star=(alfa_star*BEAM_LENGTH)/MOTOR_ARM_LENGTH;
+
     u_star=u0;
 
-    //disp1=u_star;
 
-   // dir = u0 > 0 ?  GPIO_PIN_SET : GPIO_PIN_RESET;
-  // HAL_GPIO_WritePin(StepperDir_GPIO_Port, StepperDir_Pin, dir);
 
 
     if (fabs(u0-encoder_measure)<0.01){
     	tc0= 1000000;
     }else{
-    //tc0 = sqrtf(2*M_PI*fabs(u0-encoder_measure)/0.9);// 0.9 0.4 0.1  0.2 1.05
-    	tc0 = sqrtf(2*M_PI*fabs(u0-encoder_measure)/1.25);
+    //tc0 = sqrtf(2*M_PI*fabs(u0-encoder_measure)/0.9); // 0.9 è l'accellerazione massima
+      tc0 = sqrtf(2*M_PI*fabs(u0-encoder_measure)/1.25);
     }
 
-    //tc0 = sqrtf(2*M_PI*fabs(u_star-encoder_measure)/1.8);//0.4 0.1  0.2 1.05
-     //u0=(u_star-encoder_measure)/tc0;
     u0=(fabs(u0-encoder_measure))/tc0;
 
-    disp1=u0; //--mostrare uscita cicloidale
-
-
+    //--mostrare uscita cicloidale
+    disp1=u0;
     sys->last_pid_out=u0;
 
-    //uscita pid diretta senza cicloidale
+    //uscita pid diretta senza traiettoria cicloidale
 
     //disp1=u_star;
     //sys->last_pid_out=u_star;

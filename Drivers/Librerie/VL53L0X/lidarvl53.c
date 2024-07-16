@@ -21,13 +21,6 @@ void lidar_init(uint8_t dir)
       Dev->comms_speed_khz=100;//  i2c a 400khz prima era 400  variato a 100
 
 
-      //VL53L0X_comms_initialise (I2C, 100);
-
-
-
-
-
-      //VL53L0X_WaitDeviceBooted( Dev );
 	  VL53L0X_DataInit( Dev );
 	  VL53L0X_StaticInit( Dev );
 	  VL53L0X_PerformRefSpadManagement(Dev, &refSpadCount, &isApertureSpads);
@@ -37,16 +30,18 @@ void lidar_init(uint8_t dir)
 	  VL53L0X_SetDeviceMode(Dev, VL53L0X_DEVICEMODE_SINGLE_RANGING);
 	  VL53L0X_SetLimitCheckEnable(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, 1);
 	  VL53L0X_SetLimitCheckEnable(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, 1);
-	  //VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.1*65536)); //long range timing
+
 	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.25*65536)); //high accuracy
 	  VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, (FixPoint1616_t)(18*65536));
 	  VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev, 20000);
 	  VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
 	  VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
-	 // VL53L0X_SetGpioConfig(Dev,LidarTrigger_Pin, VL53L0X_HISTOGRAMMODE_DISABLED,VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY,VL53L0X_INTERRUPTPOLARITY_HIGH);
+
 	  VL53L0X_SetRangeFractionEnable( Dev, 1);
 
 }
+
+// i delay inseriti sono stati presi dal datasheet del sensore per garantire un corretto sturt-up del dispositivo
 
 void cont_lidar_init(uint8_t dir, uint32_t ts)
 {
@@ -63,7 +58,7 @@ void cont_lidar_init(uint8_t dir, uint32_t ts)
       Status = VL53L0X_DataInit( Dev );
       Status = VL53L0X_StaticInit( Dev );
 
-      //Status = VL53L0X_ResetDevice(Dev);
+
       print_pal_error(Status);
 
       HAL_Delay(100);
@@ -71,16 +66,11 @@ void cont_lidar_init(uint8_t dir, uint32_t ts)
       Status = VL53L0X_PerformRefCalibration(Dev, &VhvSettings, &PhaseCal);
       HAL_Delay(12); // delay preso dal datasheet +20%
       Status = VL53L0X_PerformRefSpadManagement(Dev, &refSpadCount, &isApertureSpads);
-     // Status =VL53L0X_SetRefCalibration(Dev, &VhvSettings, &PhaseCal);
 
-      //Status =VL53L0X_GetXTalkCompensationEnable(Dev,1);
       HAL_Delay(48);
 
       print_pal_error(Status);
 
-      // High speed  (review del 17-05 )
-      //Status = VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.25*65536));//0.18
-      //Status = VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, (FixPoint1616_t)(35*65536));//35
 
 
       Status = VL53L0X_SetDeviceMode(Dev, VL53L0X_DEVICEMODE_CONTINUOUS_TIMED_RANGING);
@@ -93,32 +83,7 @@ void cont_lidar_init(uint8_t dir, uint32_t ts)
       Status = VL53L0X_SetVcselPulsePeriod(Dev, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
 
 
-
       print_pal_error(Status);
-
-      //Status = VL53L0X_SetLimitCheckEnable( Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, 1 );
-      //Status = VL53L0X_SetLimitCheckEnable( Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, 1 );
-     // Status = VL53L0X_SetLimitCheckEnable( Dev, VL53L0X_CHECKENABLE_RANGE_IGNORE_THRESHOLD, 1 );
-     // Status = VL53L0X_SetLimitCheckValue( Dev, VL53L0X_CHECKENABLE_RANGE_IGNORE_THRESHOLD, (FixPoint1616_t)( 1.5 * 0.023 * 65536 ) );
-
-      print_pal_error(Status);
-
-
-
-
-
-	  //VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.1*65536)); //long range timing
-      //Status = VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, (FixPoint1616_t)(0.25*65536)); //high accuracy
-      //Status = VL53L0X_SetLimitCheckValue(Dev, VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, (FixPoint1616_t)(18*65536));
-
-
-
-
-
-	  //VL53L0X_SetInterMeasurementPeriodMilliSeconds ( Dev, 50);
-
-      //Status =  VL53L0X_SetGpioConfig(Dev,LidarTrigger_Pin, VL53L0X_HISTOGRAMMODE_DISABLED,VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY,VL53L0X_INTERRUPTPOLARITY_HIGH);
-	 // VL53L0X_SetRangeFractionEnable( Dev, 1);
 
 
       Status= VL53L0X_StartMeasurement( Dev);

@@ -186,12 +186,12 @@ int main(void)
 
       ready=0;
 
-     // NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+
 	  millimeter =getRangeData();
       distance=(float) millimeter;
 	 printf(" DISTNCE %f\n",distance);
 	 fflush(stdout);
-	 //NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+
 
 	 if(!isFirstReading==0){
 		 rblast(&sys.Ball_pos,&lastreading);
@@ -214,23 +214,6 @@ int main(void)
      error=sys.pid_pos.prev_err;
 
 
-    // rblast(&sys.q0,&q0e);
-
-      // q0e=q0e;
-
-
-     //rblast(&sys.Ball_pos,&distance);
-     //printf(" DISTNCE %f\n",distance);
-      //fflush(stdout);
-
-
-     //PID_controller_position(&sys,&pid_pos, setpoint);
-     //apply_velocity_input(&htim2);
-
-
-
-
-     //HAL_Delay(10);
 
 
     /* USER CODE END WHILE */
